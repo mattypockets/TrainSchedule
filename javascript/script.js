@@ -9,7 +9,8 @@ $(document).ready(function(){
         storageBucket: "",
         messagingSenderId: "766007837568"
       };
-      firebase.initializeApp(config);
+
+    firebase.initializeApp(config);
     
     var dataRef = firebase.database();
 
@@ -43,10 +44,41 @@ $(document).ready(function(){
     })
 
 
-    // Calculate time until next train
+    // Display info on DOM when a new train is added
+    dataRef.ref().on("child_added", function(snapshot){
+        
+        // Set variables from database values
+        var trainName = snapshot.val().trainName;
+        var destination = snapshot.val().destination;
+        var firstTime = snapshot.val().firstTime;
+        var frequency = snapshot.val().frequency;
+        console.log(firstTime);
+        // Set current time as a variable
+        var currentTime = moment();
 
-    // Calculate when next train will arrive
+        // Calculate time until next train
+        var difference = currentTime.diff(moment(firstTime), "minutes");
 
-    // Display info on DOM
-    
+        var remainder = difference % frequency;
+
+        var minutesAway = frequency - remainder;
+        
+        // Calculate when next train will arrive
+
+        var nextArrival = currentTime.add(minutesAway, "minutes");
+        console.log(nextArrival);
+
+        // Prep info to add to table
+        var newRow = $("<tr>").append(
+            $("<td>").text(trainName),
+            $("<td>").text(destination),
+            $("<td>").text(frequency),
+            $("<td>").text(nextArrival),
+            $("<td>").text(minutesAway)
+        )
+        
+        // Add info to table
+        $(".trainTable > tbody").append(newRow);
+    })
+
 });
