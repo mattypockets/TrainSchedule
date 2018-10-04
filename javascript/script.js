@@ -21,7 +21,8 @@ $(document).ready(function(){
         // Set variables for each input field
         var trainName = $(".trainName").val().trim();
         var destination = $(".destination").val().trim();
-        var firstTime = moment($(".firstTime").val().trim(), "HH:mm").format("X");
+        // var firstTime = moment($(".firstTime").val().trim(), "HH:mm").format("X");
+        var firstTime = $(".firstTime").val().trim();
         var frequency = $(".frequency").val().trim();
 
         // Bundle variables into an object
@@ -48,32 +49,38 @@ $(document).ready(function(){
     dataRef.ref().on("child_added", function(snapshot){
         
         // Set variables from database values
-        var trainName = snapshot.val().trainName;
-        var destination = snapshot.val().destination;
-        var firstTime = snapshot.val().firstTime;
-        var frequency = snapshot.val().frequency;
-        console.log(firstTime);
+        var newTrainName = snapshot.val().trainName;
+        var newDestination = snapshot.val().destination;
+        var newFirstTime = snapshot.val().firstTime;
+        var newFrequency = snapshot.val().frequency;
+        console.log(newFirstTime);
+
         // Set current time as a variable
         var currentTime = moment();
 
+        // Push back first train so that it comes before current time
+        var firstTimeConverted = moment(newFirstTime, "HH:mm").subtract(1, "years");
+
         // Calculate time until next train
-        var difference = currentTime.diff(moment(firstTime), "minutes");
+        var difference = currentTime.diff(moment(firstTimeConverted), "minutes");
 
-        var remainder = difference % frequency;
+        var remainder = difference % newFrequency;
 
-        var minutesAway = frequency - remainder;
+        var minutesAway = newFrequency - remainder;
         
         // Calculate when next train will arrive
 
         var nextArrival = currentTime.add(minutesAway, "minutes");
-        console.log(nextArrival);
+        var catchTrain = moment(nextArrival).format("HH:mm");
+        
+
 
         // Prep info to add to table
         var newRow = $("<tr>").append(
-            $("<td>").text(trainName),
-            $("<td>").text(destination),
-            $("<td>").text(frequency),
-            $("<td>").text(nextArrival),
+            $("<td>").text(newTrainName),
+            $("<td>").text(newDestination),
+            $("<td>").text(newFrequency),
+            $("<td>").text(catchTrain),
             $("<td>").text(minutesAway)
         )
         
